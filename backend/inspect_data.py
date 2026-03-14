@@ -21,8 +21,8 @@ print("\nTarget distribution:")
 print(df["y"].value_counts())
 print(df["y"].value_counts(normalize=True))
 
-categorical_cols = df.select_dtypes(include="object").columns.tolist()
-numeric_cols = df.select_dtypes(exclude="object").columns.tolist()
+categorical_cols = df.select_dtypes(include=["object", "string"]).columns.tolist()
+numeric_cols = df.select_dtypes(exclude=["object", "string"]).columns.tolist()
 
 print("\nCategorical columns:")
 print(categorical_cols)
