@@ -1,39 +1,53 @@
+import os
+import joblib
 import pandas as pd
 
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import (
+    classification_report,
+    confusion_matrix,
+    roc_auc_score,
     accuracy_score,
     precision_score,
     recall_score,
-    f1_score,
-    roc_auc_score
+    f1_score
 )
 
-from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier
-
 DATA_PATH = "../data/raw/bank-additional-full.csv"
+MODEL_DIR = "trained_models"
 
 # -----------------------------
-# 1. Load data
+# 1. Load dataset
 # -----------------------------
 df = pd.read_csv(DATA_PATH, sep=";")
 
-# Remove leakage column
+# -----------------------------
+# 2. Remove leakage column
+# -----------------------------
 if "duration" in df.columns:
     df = df.drop(columns=["duration"])
 
+# -----------------------------
+# 3. Split features and target
+# -----------------------------
 X = df.drop(columns=["y"])
 y = df["y"].map({"no": 0, "yes": 1})
 
+# -----------------------------
+# 4. Identify column types
+# -----------------------------
 categorical_cols = X.select_dtypes(include=["object", "string"]).columns.tolist()
 numeric_cols = X.select_dtypes(exclude=["object", "string"]).columns.tolist()
 
+print("Categorical columns:", categorical_cols)
+print("Numeric columns:", numeric_cols)
+
 # -----------------------------
-# 2. Split data
+# 5. Train-test split
 # -----------------------------
 X_train, X_test, y_train, y_test = train_test_split(
     X,
@@ -44,7 +58,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 )
 
 # -----------------------------
-# 3. Shared preprocessor
+# 6. Preprocessing
 # -----------------------------
 preprocessor = ColumnTransformer(
     transformers=[
@@ -54,67 +68,61 @@ preprocessor = ColumnTransformer(
 )
 
 # -----------------------------
-# 4. Models to compare
+# 7. Model
 # -----------------------------
-models = {
-    "Logistic Regression": LogisticRegression(
-        max_iter=2000,
-        class_weight="balanced",
-        random_state=42
-    ),
-    "Random Forest": RandomForestClassifier(
-        n_estimators=200,
-        max_depth=10,
-        min_samples_split=10,
-        min_samples_leaf=4,
-        class_weight="balanced",
-        random_state=42,
-        n_jobs=-1
-    ),
-    "Extra Trees": ExtraTreesClassifier(
-        n_estimators=300,
-        max_depth=12,
-        min_samples_split=10,
-        min_samples_leaf=4,
-        class_weight="balanced",
-        random_state=42,
-        n_jobs=-1
-    )
-}
+model = RandomForestClassifier(
+    n_estimators=200,
+    max_depth=10,
+    min_samples_split=10,
+    min_samples_leaf=4,
+    class_weight="balanced",
+    random_state=42,
+    n_jobs=-1
+)
 
 # -----------------------------
-# 5. Train and evaluate
+# 8. Full pipeline
 # -----------------------------
-results = []
-
-for model_name, model in models.items():
-    pipeline = Pipeline(steps=[
-        ("preprocessor", preprocessor),
-        ("model", model)
-    ])
-
-    print(f"\nTraining {model_name}...")
-    pipeline.fit(X_train, y_train)
-
-    y_pred = pipeline.predict(X_test)
-    y_prob = pipeline.predict_proba(X_test)[:, 1]
-
-    metrics = {
-        "Model": model_name,
-        "Accuracy": round(accuracy_score(y_test, y_pred), 4),
-        "Precision": round(precision_score(y_test, y_pred), 4),
-        "Recall": round(recall_score(y_test, y_pred), 4),
-        "F1": round(f1_score(y_test, y_pred), 4),
-        "ROC_AUC": round(roc_auc_score(y_test, y_prob), 4)
-    }
-
-    results.append(metrics)
+pipeline = Pipeline(steps=[
+    ("preprocessor", preprocessor),
+    ("model", model)
+])
 
 # -----------------------------
-# 6. Show results
+# 9. Train
 # -----------------------------
-results_df = pd.DataFrame(results)
-results_df = results_df.sort_values(by="ROC_AUC", ascending=False)
+print("\nTraining model...")
+pipeline.fit(X_train, y_train)
 
-print("\nModel Comparison Results:")
-print(results_df.to_string(index=False))
+# -----------------------------
+# 10. Predict
+# -----------------------------
+y_pred = pipeline.predict(X_test)
+y_prob = pipeline.predict_proba(X_test)[:, 1]
+
+# -----------------------------
+# 11. Evaluate
+# -----------------------------
+print("\nModel Evaluation:")
+print("Accuracy :", round(accuracy_score(y_test, y_pred), 4))
+print("Precision:", round(precision_score(y_test, y_pred), 4))
+print("Recall   :", round(recall_score(y_test, y_pred), 4))
+print("F1 Score :", round(f1_score(y_test, y_pred), 4))
+print("ROC AUC  :", round(roc_auc_score(y_test, y_prob), 4))
+
+print("\nConfusion Matrix:")
+print(confusion_matrix(y_test, y_pred))
+
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred))
+
+# -----------------------------
+# 12. Save model
+# -----------------------------
+os.makedirs(MODEL_DIR, exist_ok=True)
+
+joblib.dump(pipeline, os.path.join(MODEL_DIR, "bank_lead_model.pkl"))
+joblib.dump(categorical_cols, os.path.join(MODEL_DIR, "categorical_cols.pkl"))
+joblib.dump(numeric_cols, os.path.join(MODEL_DIR, "numeric_cols.pkl"))
+
+print(f"\nModel saved successfully in: {MODEL_DIR}/")
