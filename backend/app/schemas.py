@@ -66,3 +66,16 @@ class LeadResponse(BaseModel):
 
     class Config:
         from_attributes = True
+        
+class PredictionDetailResponse(BaseModel):
+    id: int
+    lead_id: int
+    propensity_score: float
+    predicted_label: int
+    priority_band: str
+    threshold_used: float
+    model_version: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True

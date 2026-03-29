@@ -63,3 +63,14 @@ def get_leads(db: Session):
 
 def get_lead_by_id(db: Session, lead_id: int):
     return db.query(models.Lead).filter(models.Lead.id == lead_id).first()
+
+def get_predictions(db: Session):
+    return db.query(models.Prediction).all()
+
+
+def get_prediction_by_id(db: Session, prediction_id: int):
+    return db.query(models.Prediction).filter(models.Prediction.id == prediction_id).first()
+
+
+def get_predictions_by_lead_id(db: Session, lead_id: int):
+    return db.query(models.Prediction).filter(models.Prediction.lead_id == lead_id).all()
