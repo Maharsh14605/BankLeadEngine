@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import Base, engine
-from app.routes import scoring, leads, predictions
+from app.routes import scoring, leads, predictions, dashboard
 
 Base.metadata.create_all(bind=engine)
 
@@ -19,7 +19,7 @@ app.add_middleware(
 app.include_router(scoring.router)
 app.include_router(leads.router)
 app.include_router(predictions.router)
-
+app.include_router(dashboard.router)
 
 @app.get("/")
 def root():

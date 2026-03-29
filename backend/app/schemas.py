@@ -79,3 +79,15 @@ class PredictionDetailResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class DashboardLeadResponse(BaseModel):
+    lead_id: int
+    name: str | None = None
+    age: int
+    job: str
+    marital: str
+    contact: str
+    propensity_score: float | None = None
+    predicted_label: int | None = None
+    priority_band: str | None = None
+    prediction_created_at: datetime | None = None
