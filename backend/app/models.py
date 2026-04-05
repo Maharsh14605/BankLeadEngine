@@ -53,3 +53,4 @@ class Prediction(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     lead = relationship("Lead", back_populates="predictions")
+    
