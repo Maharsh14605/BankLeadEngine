@@ -94,6 +94,7 @@ def get_dashboard_leads(db: Session):
             "job": lead.job,
             "marital": lead.marital,
             "contact": lead.contact,
+            "campaign": lead.campaign,
             "propensity_score": latest_prediction.propensity_score if latest_prediction else None,
             "predicted_label": latest_prediction.predicted_label if latest_prediction else None,
             "priority_band": latest_prediction.priority_band if latest_prediction else None,
@@ -101,3 +102,24 @@ def get_dashboard_leads(db: Session):
         })
 
     return dashboard_rows
+
+
+def create_offer(db: Session, lead_id: int, file_path: str):
+    db_offer = models.Offer(
+        lead_id=lead_id,
+        file_path=file_path,
+        status="generated"
+    )
+    db.add(db_offer)
+    db.commit()
+    db.refresh(db_offer)
+    return db_offer
+
+
+def get_offer_by_lead_id(db: Session, lead_id: int):
+    return (
+        db.query(models.Offer)
+        .filter(models.Offer.lead_id == lead_id)
+        .order_by(models.Offer.created_at.desc())
+        .first()
+    )

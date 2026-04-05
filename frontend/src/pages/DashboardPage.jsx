@@ -4,6 +4,7 @@ import StatsCards from '../components/StatsCards';
 import SearchFilterBar from '../components/SearchFilterBar';
 import CustomerForm from '../components/CustomerForm';
 import LeadTable from '../components/LeadTable';
+import LeadDetailModal from '../components/LeadDetailModal';
 import api from '../api/api';
 
 function DashboardPage() {
@@ -15,6 +16,7 @@ function DashboardPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterPriority, setFilterPriority] = useState('All');
   const [sortBy, setSortBy] = useState('created_desc');
+  const [selectedLeadId, setSelectedLeadId] = useState(null);
 
   const fetchLeads = async () => {
     setLoading(true);
@@ -104,7 +106,11 @@ function DashboardPage() {
             onRefresh={fetchLeads}
           />
 
-          <LeadTable leads={processedLeads} />
+          <LeadTable leads={processedLeads} onRowClick={setSelectedLeadId} />
+
+          {selectedLeadId && (
+            <LeadDetailModal leadId={selectedLeadId} onClose={() => setSelectedLeadId(null)} />
+          )}
         </div>
       )}
     </div>

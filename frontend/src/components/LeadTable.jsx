@@ -1,7 +1,7 @@
 import React from 'react';
 import StatusBadge from './StatusBadge';
 
-function LeadTable({ leads }) {
+function LeadTable({ leads, onRowClick }) {
   if (!leads || leads.length === 0) {
     return (
       <div className="card" style={{ textAlign: 'center', padding: '4rem 2rem', color: 'var(--text-muted)' }}>
@@ -14,7 +14,7 @@ function LeadTable({ leads }) {
 
   const formatPercentage = (score) => {
     if (score === undefined || score === null) return '-';
-    return (score).toFixed(3); // pass to badge which handles rounding/percentages
+    return `${(score * 100).toFixed(1)}%`;
   };
 
   const formatDate = (dateString) => {
@@ -47,7 +47,13 @@ function LeadTable({ leads }) {
           </thead>
           <tbody>
             {leads.map((lead) => (
-              <tr key={lead.lead_id}>
+              <tr 
+                key={lead.lead_id}
+                onClick={() => onRowClick && onRowClick(lead.lead_id)}
+                style={{ cursor: onRowClick ? 'pointer' : 'default', transition: 'transform 0.1s ease, box-shadow 0.1s ease, background-color 0.2s ease' }}
+                onMouseOver={(e) => { if (onRowClick) e.currentTarget.style.backgroundColor = '#F8FAFC'; }}
+                onMouseOut={(e) => { if (onRowClick) e.currentTarget.style.backgroundColor = 'transparent'; }}
+              >
                 <td>
                   <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{lead.name || 'Anonymous'}</div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>ID: #{lead.lead_id}</div>
@@ -60,8 +66,8 @@ function LeadTable({ leads }) {
                   <div style={{ textTransform: 'capitalize', fontWeight: 500 }}>{lead.contact}</div>
                   <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Campaign: {lead.campaign}</div>
                 </td>
-                <td>
-                  <StatusBadge type="score" label={formatPercentage(lead.propensity_score)} />
+                <td style={{ fontWeight: 600, color: 'var(--accent-primary)' }}>
+                  {formatPercentage(lead.propensity_score)}
                 </td>
                 <td>
                   <StatusBadge type="prediction" label={lead.predicted_label} />

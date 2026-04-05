@@ -49,17 +49,6 @@ function StatusBadge({ type, label }) {
       };
       label = 'No';
     }
-  } else if (type === 'score') {
-      // Special badge for score in the table
-      const num = parseFloat(label);
-      if (num > 0.7) {
-        badgeStyle = { color: 'var(--color-high-text)', backgroundColor: 'transparent' };
-      } else if (num > 0.4) {
-        badgeStyle = { color: 'var(--color-medium-text)', backgroundColor: 'transparent' };
-      } else {
-        badgeStyle = { color: 'var(--text-secondary)', backgroundColor: 'transparent' };
-      }
-      return <span style={{ fontWeight: 700, ...badgeStyle }}>{(num * 100).toFixed(1)}%</span>
   }
 
   return (
