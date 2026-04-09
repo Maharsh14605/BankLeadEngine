@@ -36,6 +36,7 @@ class Lead(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     predictions = relationship("Prediction", back_populates="lead")
+    offers = relationship("Offer", back_populates="lead")
 
 
 class Prediction(Base):
@@ -53,3 +54,17 @@ class Prediction(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     lead = relationship("Lead", back_populates="predictions")
+
+
+class Offer(Base):
+    __tablename__ = "offers"
+
+    id = Column(Integer, primary_key=True, index=True)
+    lead_id = Column(Integer, ForeignKey("leads.id"), nullable=False)
+    
+    file_path = Column(String, nullable=False)
+    status = Column(String, nullable=False, default="generated")
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    lead = relationship("Lead", back_populates="offers")

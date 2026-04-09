@@ -87,7 +87,37 @@ class DashboardLeadResponse(BaseModel):
     job: str
     marital: str
     contact: str
+    campaign: int | None = None
     propensity_score: float | None = None
     predicted_label: int | None = None
     priority_band: str | None = None
     prediction_created_at: datetime | None = None
+
+
+class OfferResponse(BaseModel):
+    id: int
+    lead_id: int
+    file_path: str
+    status: str
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+
+class SHAPFeature(BaseModel):
+    feature_name: str
+    contribution: float
+
+
+class SHAPExplanationResponse(BaseModel):
+    lead_id: int
+    summary: str
+    positive_features: list[SHAPFeature]
+    negative_features: list[SHAPFeature]
+
+
+class LeadDetailResponse(BaseModel):
+    lead: LeadResponse
+    latest_prediction: PredictionDetailResponse | None = None
+    offer: OfferResponse | None = None

@@ -22,7 +22,7 @@ def add_engineered_features(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def get_priority_band(score: float) -> str:
-    if score >= 0.85:
+    if score >= 0.75:
         return "High"
     elif score >= threshold:
         return "Medium"
@@ -42,4 +42,27 @@ def score_lead(lead_data: dict) -> dict:
         "predicted_label": predicted_label,
         "priority_band": priority_band,
         "threshold_used": float(threshold)
+    }
+
+def build_model_input_from_lead(lead) -> dict:
+    return {
+        "age": lead.age,
+        "job": lead.job,
+        "marital": lead.marital,
+        "education": lead.education,
+        "default": lead.default,
+        "housing": lead.housing,
+        "loan": lead.loan,
+        "contact": lead.contact,
+        "month": lead.month,
+        "day_of_week": lead.day_of_week,
+        "campaign": lead.campaign,
+        "pdays": lead.pdays,
+        "previous": lead.previous,
+        "poutcome": lead.poutcome,
+        "emp.var.rate": lead.emp_var_rate,
+        "cons.price.idx": lead.cons_price_idx,
+        "cons.conf.idx": lead.cons_conf_idx,
+        "euribor3m": lead.euribor3m,
+        "nr.employed": lead.nr_employed
     }
